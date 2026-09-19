@@ -1,0 +1,20 @@
+[application]
+config/name="Shattered Realms"
+config/description="A dark fantasy strategy RPG combining a painted atlas world, territory conquest, heroes, armies, and dungeon exploration."
+run/main_scene="res://scenes/Main.tscn"
+config/features=PackedStringArray("4.5", "GL Compatibility")
+
+[display]
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/stretch/mode="canvas_items"
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+
+[input]
+select="MouseButton(1)"
+back="Key(Escape)"
