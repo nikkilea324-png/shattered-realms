@@ -1,0 +1,8 @@
+{
+  "classes": {
+    "warden": {"name":"Warden","strength":4,"agility":2,"will":3,"role":"frontline"},
+    "arcanist": {"name":"Arcanist","strength":1,"agility":3,"will":5,"role":"control"},
+    "ranger": {"name":"Ranger","strength":3,"agility":5,"will":2,"role":"scout"}
+  },
+  "starter_hero": {"name":"Kael","class":"warden","level":1,"xp":0,"hp":28}
+}
