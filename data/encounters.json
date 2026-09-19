@@ -1,0 +1,7 @@
+{
+  "encounters": [
+    {"id":"wolf_pack","type":"combat","biome":"forest","threat":2,"reward":"food"},
+    {"id":"ruined_shrine","type":"choice","biome":"frontier","threat":1,"reward":"relic"},
+    {"id":"ancient_wyrm","type":"world_threat","biome":"mountain","threat":10,"reward":"legendary_relic"}
+  ]
+}
