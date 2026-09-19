@@ -1,0 +1,22 @@
+name: Validate Shattered Realms
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check project structure
+        shell: bash
+        run: |
+          test -f project.godot
+          test -f scenes/Main.tscn
+          test -f scripts/main.gd
+          test -f scripts/grid_controller.gd
+          test -f data/territories.json
+          echo "Shattered Realms structure OK"
