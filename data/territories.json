@@ -1,0 +1,10 @@
+{
+  "world": "The Shattered Realms",
+  "territories": [
+    {"id":"crownspine","name":"Crownspine","terrain":"mountain","special":"ancient_pass"},
+    {"id":"greenvale","name":"Greenvale","terrain":"forest","special":"old_road"},
+    {"id":"dreadfen","name":"Dreadfen","terrain":"swamp","special":"sunken_ruins"},
+    {"id":"ashen_march","name":"Ashen March","terrain":"waste","special":"war_scar"},
+    {"id":"sunreach","name":"Sunreach","terrain":"desert","special":"buried_city"}
+  ]
+}
