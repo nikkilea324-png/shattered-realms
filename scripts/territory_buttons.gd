@@ -2,6 +2,7 @@ extends Control
 
 var regions := [
 	["Crownspine", Rect2(55,145,300,220)],
+	["Ravenwood", Rect2(325,335,295,225)],
 	["Greenvale", Rect2(325,335,295,225)],
 	["Dreadfen", Rect2(610,400,285,205)],
 	["Ashen March", Rect2(885,115,300,250)],
