@@ -30,7 +30,11 @@ func _ready() -> void:
 	queue_redraw()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+	# Android sends InputEventScreenTouch rather than a mouse click on a real
+	# touchscreen. Handle both so the same game works on PC and Android.
+	if event is InputEventScreenTouch and event.pressed:
+		_handle_click(event.position)
+	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		_handle_click(event.position)
 	elif event is InputEventKey and event.pressed:
 		match event.keycode:
