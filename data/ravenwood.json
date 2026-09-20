@@ -1,0 +1,24 @@
+{
+  "id": "ravenwood",
+  "name": "Ravenwood",
+  "terrain": {
+    "forest": {"movement": 2, "defense": 1, "ambush": 1},
+    "plains": {"movement": 1, "defense": 0, "ambush": 0},
+    "hills": {"movement": 2, "defense": 1, "ambush": 1},
+    "mountain": {"movement": 3, "defense": 2, "ambush": 0},
+    "marsh": {"movement": 3, "defense": 0, "ambush": 1},
+    "road": {"movement": 1, "defense": 0, "ambush": 0},
+    "water": {"movement": 4, "defense": -1, "ambush": 0}
+  },
+  "locations": {
+    "oakenheart": {"cell": [8, 5], "type": "capital", "name": "Oakenheart Capital"},
+    "north_watch": {"cell": [10, 0], "type": "fort", "name": "North Watch"},
+    "west_gate": {"cell": [4, 4], "type": "fort", "name": "West Gate Post"},
+    "ravenwood_bridge": {"cell": [13, 9], "type": "fort", "name": "Ravenwood Bridge"},
+    "elder_grove": {"cell": [14, 6], "type": "special", "name": "Elder Grove"},
+    "redspire_mine": {"cell": [4, 9], "type": "mine", "name": "Redspire Mine"},
+    "hidden_dungeon": {"cell": [5, 7], "type": "dungeon", "name": "The Rootbound Vault"},
+    "forest_troll_lair": {"cell": [15, 7], "type": "monster_lair", "name": "Forest Troll Lair"},
+    "hollow_outpost": {"cell": [9, 8], "type": "enemy", "name": "The Hollow Outpost"}
+  }
+}
