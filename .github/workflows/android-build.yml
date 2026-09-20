@@ -32,8 +32,8 @@ jobs:
         # Pin to a known-good commit of the Godot export action.
         uses: NodotProject/godot-export@0e3422217e73e94c704ae8b2c4cd142907139afb
         with:
-          godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/4.5/Godot_v4.5-stable_linux.x86_64.zip
-          godot_export_templates_download_url: https://downloads.tuxfamily.org/godotengine/4.5/Godot_v4.5-stable_export_templates.tpz
+          godot_executable_download_url: https://github.com/godotengine/godot-builds/releases/download/4.5.2-stable/Godot_v4.5.2-stable_linux.x86_64.zip
+          godot_export_templates_download_url: https://github.com/godotengine/godot-builds/releases/download/4.5.2-stable/Godot_v4.5.2-stable_export_templates.tpz
           relative_project_path: ./
           use_preset_export_path: true
           presets_to_export: Android
