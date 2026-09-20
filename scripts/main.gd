@@ -10,6 +10,9 @@ const GRID := 56
 const BOARD_ORIGIN := Vector2(80, 105)
 const BOARD_COLS := 16
 const BOARD_ROWS := 9
+const HEX_SIZE := 27.0
+const RAVEN_COLS := 17
+const RAVEN_ROWS := 10
 
 var mode := "world"
 var selected_territory := ""
@@ -30,6 +33,14 @@ var player_army := ArmyState.new()
 var tactical_battle: TacticalBattleState
 var selected_attack_unit := "swordsmen"
 var selected_target_unit := "shieldguard"
+var ravenwood_terrain: Dictionary = {}
+var ravenwood_locations: Dictionary = {}
+var ravenwood_armies := [
+	{"name":"Kaela Varyn","role":"Defensive Army","cell":Vector2i(8,5),"icon":"K"},
+	{"name":"Edrin Vale","role":"Ranger Party","cell":Vector2i(3,3),"icon":"E"},
+	{"name":"Hakon Blood-Eye","role":"Raiding Army","cell":Vector2i(12,8),"icon":"H"},
+	{"name":"Nyra Vex","role":"Scout","cell":Vector2i(6,6),"icon":"N"}
+]
 
 var territories := [
 	{"name":"Crownspine","rect":Rect2(55,145,300,220),"kind":"mountain","color":Color("#4d5360")},
@@ -41,6 +52,7 @@ var territories := [
 
 func _ready() -> void:
 	player_army.units = {"militia":1,"swordsmen":3,"spearmen":2,"archers":2,"crossbowmen":1,"knights":1,"riders":1,"rangers":1}
+	_load_ravenwood()
 	queue_redraw()
 
 func _input(event: InputEvent) -> void:
@@ -233,11 +245,52 @@ func _end_turn() -> void:
 	queue_redraw()
 
 func _cell_at(pos: Vector2) -> Vector2i:
+	if mode == "territory" and selected_territory == "Ravenwood":
+		return _raven_hex_at(pos)
 	var local := pos - BOARD_ORIGIN
 	return Vector2i(floori(local.x / GRID), floori(local.y / GRID))
 
 func _valid_cell(cell: Vector2i) -> bool:
+	if mode == "territory" and selected_territory == "Ravenwood":
+		return cell.x >= 0 and cell.x < RAVEN_COLS and cell.y >= 0 and cell.y < RAVEN_ROWS
 	return cell.x >= 0 and cell.x < BOARD_COLS and cell.y >= 0 and cell.y < BOARD_ROWS
+
+func _load_ravenwood() -> void:
+	var file := FileAccess.open("res://data/ravenwood.json", FileAccess.READ)
+	if file == null:
+		return
+	var parsed = JSON.parse_string(file.get_as_text())
+	if parsed is Dictionary:
+		ravenwood_terrain = parsed.get("terrain", {})
+		ravenwood_locations = parsed.get("locations", {})
+
+func _raven_hex_center(cell: Vector2i) -> Vector2:
+	var x := BOARD_ORIGIN.x + 42.0 + float(cell.x) * (HEX_SIZE * 1.5)
+	var y := BOARD_ORIGIN.y + 34.0 + float(cell.y) * (HEX_SIZE * 1.73) + (21.0 if cell.x % 2 == 1 else 0.0)
+	return Vector2(x,y)
+
+func _raven_hex_at(pos: Vector2) -> Vector2i:
+	var best := Vector2i(-99,-99)
+	var best_dist := 99999.0
+	for y in range(RAVEN_ROWS):
+		for x in range(RAVEN_COLS):
+			var cell := Vector2i(x,y)
+			var d := _raven_hex_center(cell).distance_squared_to(pos)
+			if d < best_dist:
+				best_dist = d
+				best = cell
+	return best if best_dist <= HEX_SIZE * HEX_SIZE * 2.0 else Vector2i(-99,-99)
+
+func _raven_terrain_at(cell: Vector2i) -> String:
+	if cell.x <= 2 and cell.y >= 2:
+		return "mountain"
+	if cell.x >= 14 and cell.y >= 2:
+		return "marsh"
+	if cell.y <= 1 or (cell.x <= 4 and cell.y <= 4):
+		return "forest"
+	if cell.x >= 5 and cell.x <= 12 and cell.y >= 2 and cell.y <= 7:
+		return "forest"
+	return "plains"
 
 func is_cell_discovered(cell: Vector2i) -> bool:
 	return discovered_cells.has(cell)
@@ -283,27 +336,74 @@ func _draw_world() -> void:
 	draw_string(ThemeDB.fallback_font, Vector2(40,685), "Every territory can become a detailed playable board.", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("#77766f"))
 
 func _draw_territory() -> void:
+	if selected_territory == "Ravenwood":
+		_draw_ravenwood()
+		return
 	_draw_header(selected_territory.to_upper(), "TERRITORY BOARD  •  GRID CONQUEST")
 	_draw_grid()
-	# forest pockets
 	for p in [Vector2i(1,1),Vector2i(2,1),Vector2i(2,2),Vector2i(13,6),Vector2i(14,6),Vector2i(14,7)]:
 		var r := Rect2(BOARD_ORIGIN + Vector2(p) * GRID, Vector2(GRID, GRID))
 		draw_circle(r.get_center(), 19, Color("#314432"))
-	# road and river
-	draw_line(BOARD_ORIGIN + Vector2(0,6.5) * GRID, BOARD_ORIGIN + Vector2(15,6.5) * GRID, Color("#6e624f"), 10)
-	draw_line(BOARD_ORIGIN + Vector2(0,6.5) * GRID, BOARD_ORIGIN + Vector2(15,6.5) * GRID, Color("#3b352d"), 6)
-	draw_line(BOARD_ORIGIN + Vector2(8,0) * GRID, BOARD_ORIGIN + Vector2(9,9) * GRID, Color("#294653"), 13)
-	# Hidden points remain unseen until the party explores nearby.
-	if is_cell_discovered(cave_cell):
-		var cr := Rect2(BOARD_ORIGIN + Vector2(cave_cell) * GRID, Vector2(GRID, GRID))
-		draw_circle(cr.get_center(), 18, Color("#151519"))
-		draw_arc(cr.get_center(), 19, PI, TAU, 14, Color("#96715a"), 4)
-	if not enemy_defeated and is_cell_discovered(enemy_cell):
-		_draw_actor(enemy_cell, "E")
-	_draw_fog_overlay()
 	_draw_actor(hero_cell, "H")
-	_draw_panel(Vector2(995,105), Vector2(250,235), "SCOUT REPORT", ["Terrain: frontier","Roads: 2","Ruins: 1","Hidden sites: 1","Hostiles: %s" % ("defeated" if enemy_defeated else "1 creature"),"Turn: %d" % turn_number,"AP: %d / %d" % [action_points, MAX_ACTION_POINTS],"Hero HP: %d / 5" % hero_hp,("COMBAT: enemy HP %d / 3" % enemy_hp) if in_combat else "","","WASD / arrows to move","Tap a tile to move"])
+	_draw_fog_overlay()
 
+func _draw_ravenwood() -> void:
+	_draw_header("RAVENWOOD", "THE EMERALD HEART  •  TERRITORY CONQUEST")
+	for y in range(RAVEN_ROWS):
+		for x in range(RAVEN_COLS):
+			var cell := Vector2i(x,y)
+			var base := Color("#2d4933")
+			match _raven_terrain_at(cell):
+				"mountain": base = Color("#4c4d52")
+				"marsh": base = Color("#31473e")
+				"plains": base = Color("#5a583f")
+			_draw_hex(_raven_hex_center(cell), base, cell == hero_cell)
+	var road := PackedVector2Array([_raven_hex_center(Vector2i(8,5)),_raven_hex_center(Vector2i(8,3)),_raven_hex_center(Vector2i(9,2)),_raven_hex_center(Vector2i(10,0))])
+	draw_polyline(road, Color("#8b7658"), 7)
+	var river := PackedVector2Array([_raven_hex_center(Vector2i(13,2)),_raven_hex_center(Vector2i(14,4)),_raven_hex_center(Vector2i(13,6)),_raven_hex_center(Vector2i(14,8)),_raven_hex_center(Vector2i(13,9))])
+	draw_polyline(river, Color("#375f69"), 11)
+	for id in ravenwood_locations:
+		var loc: Dictionary = ravenwood_locations[id]
+		var cell := Vector2i(int(loc.cell[0]), int(loc.cell[1]))
+		if id == "hidden_dungeon" and not is_cell_discovered(cell):
+			continue
+		_draw_raven_location(cell, str(loc.type), str(loc.name))
+	for army in ravenwood_armies:
+		_draw_commander_piece(army)
+	_draw_raven_fog()
+	_draw_panel(Vector2(995,105), Vector2(250,250), "RAVENWOOD", ["Capital: Oakenheart","Forest: +1 defense / ambush","Plains: 1 movement","Mountain: 3 movement / +2 defense","Marsh: 3 movement","Turn: %d" % turn_number,"AP: %d / %d" % [action_points, MAX_ACTION_POINTS],"Commanders: 4","Hidden dungeon: %s" % ("revealed" if is_cell_discovered(Vector2i(5,7)) else "unknown")])
+
+func _draw_hex(center: Vector2, fill: Color, selected: bool = false) -> void:
+	var pts := PackedVector2Array()
+	for i in range(6):
+		var a := PI / 6.0 + float(i) * PI / 3.0
+		pts.append(center + Vector2(cos(a),sin(a)) * HEX_SIZE)
+	draw_colored_polygon(pts, fill)
+	pts.append(pts[0])
+	draw_polyline(pts, Color("#d9bf72") if selected else Color("#737266"), 1.5)
+
+func _draw_raven_location(cell: Vector2i, kind: String, label: String) -> void:
+	var c := _raven_hex_center(cell)
+	var col := Color("#c7b26b")
+	if kind == "enemy" or kind == "monster_lair": col = Color("#a4473f")
+	elif kind == "dungeon": col = Color("#9a72b2")
+	draw_circle(c, 12, Color("#141518"))
+	draw_circle(c, 8, col)
+	draw_string(ThemeDB.fallback_font, c + Vector2(-45,31), label, HORIZONTAL_ALIGNMENT_LEFT, 105, 9, Color("#e5dcc7"))
+
+func _draw_commander_piece(army: Dictionary) -> void:
+	var c := _raven_hex_center(army.cell)
+	draw_circle(c + Vector2(0,-9), 15, Color("#101114"))
+	draw_circle(c + Vector2(0,-9), 11, Color("#b59b63"))
+	draw_string(ThemeDB.fallback_font, c + Vector2(-5,-4), str(army.icon), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#171719"))
+	draw_string(ThemeDB.fallback_font, c + Vector2(-42,25), str(army.name), HORIZONTAL_ALIGNMENT_LEFT, 100, 9, Color("#ddd3bd"))
+
+func _draw_raven_fog() -> void:
+	for y in range(RAVEN_ROWS):
+		for x in range(RAVEN_COLS):
+			var cell := Vector2i(x,y)
+			if not is_cell_discovered(cell):
+				_draw_hex(_raven_hex_center(cell), Color("#121519"))
 func _draw_fog_overlay() -> void:
 	for y in range(BOARD_ROWS):
 		for x in range(BOARD_COLS):
