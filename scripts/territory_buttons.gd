@@ -20,9 +20,11 @@ func _process(_delta: float) -> void:
 	if game.mode != current_mode:
 		_rebuild()
 	elif game.mode == "territory":
-		var want_cave_button := game.hero_cell == game.cave_cell
+		var want_cave_button := game.hero_cell == game.cave_cell and not game.in_combat
+		var want_attack_button := game.in_combat
 		var has_cave_button := get_node_or_null("EnterCave") != null
-		if want_cave_button != has_cave_button:
+		var has_attack_button := get_node_or_null("Attack") != null
+		if want_cave_button != has_cave_button or want_attack_button != has_attack_button:
 			_rebuild()
 
 func _rebuild() -> void:
@@ -32,14 +34,18 @@ func _rebuild() -> void:
 	if current_mode == "world":
 		for region in regions:
 			_add_button(region[1], "", "territory", region[0])
-	elif current_mode == "territory" and get_parent().hero_cell == get_parent().cave_cell:
-		_add_button(Rect2(1025,625,190,52), "ENTER CAVE", "enter_cave", "")
+	elif current_mode == "territory":
+		_add_button(Rect2(1025,560,190,52), "END TURN", "end_turn", "")
+		if get_parent().in_combat:
+			_add_button(Rect2(1025,625,190,52), "ATTACK", "attack", "")
+		elif get_parent().hero_cell == get_parent().cave_cell:
+			_add_button(Rect2(1025,625,190,52), "ENTER CAVE", "enter_cave", "")
 	elif current_mode == "dungeon":
 		_add_button(Rect2(1025,625,190,52), "RETURN TO MAP", "return_world", "")
 
 func _add_button(rect: Rect2, label: String, action: String, territory_name: String) -> void:
 	var button := Button.new()
-	button.name = "EnterCave" if action == "enter_cave" else action + "_" + territory_name
+	button.name = "EnterCave" if action == "enter_cave" else ("Attack" if action == "attack" else action + "_" + territory_name)
 	button.position = rect.position
 	button.size = rect.size
 	button.text = label
