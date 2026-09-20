@@ -30,3 +30,9 @@ func test_territory_can_reach_cave_and_enter_dungeon() -> void:
 	game.hero_cell = game.cave_cell
 	game._handle_click(Vector2(1100, 650))
 	assert_that(game.mode).is_equal("dungeon")
+
+func test_territory_button_layer_is_present_and_touch_layer_is_transparent() -> void:
+	var touch_layer := game.get_node("TouchLayer")
+	var button_layer := game.get_node("TerritoryButtons")
+	assert_that(touch_layer.mouse_filter).is_equal(Control.MOUSE_FILTER_IGNORE)
+	assert_that(button_layer.get_child_count()).is_equal(5)
