@@ -13,12 +13,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
+        with:
+          packages: "platform-tools"
+
+      - name: Install Android build packages
+        run: |
+          sdkmanager "platform-tools" "build-tools;35.0.0" "platforms;android-35"
 
       - name: Export APK
-        # Pin to the current commit of NodotProject/godot-export.
-        # The published v7.0.0 ref is currently not resolvable by GitHub Actions.
+        # Pin to a known-good commit of the Godot export action.
         uses: NodotProject/godot-export@0e3422217e73e94c704ae8b2c4cd142907139afb
         with:
           godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/4.5/Godot_v4.5-stable_linux.x86_64.zip
