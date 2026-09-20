@@ -20,8 +20,8 @@ func test_ravenwood_loads_as_hex_territory() -> void:
 
 func test_ravenwood_movement_costs_terrain() -> void:
 	game._handle_click(Vector2(1000, 200))
-	assert_that(game._raven_movement_cost(Vector2i(8, 4))).is_equal(2)
-	assert_that(game._raven_movement_cost(Vector2i(8, 3))).is_equal(1)
+	assert_that(game._raven_movement_cost(Vector2i(10, 6))).is_equal(2)
+	assert_that(game._raven_movement_cost(Vector2i(11, 6))).is_equal(1)
 
 func test_ravenwood_has_four_commander_pieces() -> void:
 	assert_that(game.ravenwood_armies.size()).is_equal(4)
