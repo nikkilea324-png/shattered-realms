@@ -17,7 +17,9 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Export APK
-        uses: NodotProject/godot-export@v7.0.0
+        # Pin to the current commit of NodotProject/godot-export.
+        # The published v7.0.0 ref is currently not resolvable by GitHub Actions.
+        uses: NodotProject/godot-export@0e3422217e73e94c704ae8b2c4cd142907139afb
         with:
           godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/4.5/Godot_v4.5-stable_linux.x86_64.zip
           godot_export_templates_download_url: https://downloads.tuxfamily.org/godotengine/4.5/Godot_v4.5-stable_export_templates.tpz
