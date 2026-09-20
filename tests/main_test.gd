@@ -16,9 +16,8 @@ func test_world_map_selects_territory() -> void:
 	assert_that(game.mode).is_equal("territory")
 	assert_that(game.selected_territory).is_equal("Crownspine")
 
-func test_territory_button_action_selects_ravenwood() -> void:
-	var button_layer: Control = game.get_node("TerritoryButtons")
-	button_layer._action_pressed("territory", "Ravenwood")
+func test_ravenwood_territory_selection() -> void:
+	game._handle_click(Vector2(450, 400))
 	assert_that(game.mode).is_equal("territory")
 	assert_that(game.selected_territory).is_equal("Ravenwood")
 
