@@ -71,3 +71,18 @@ func test_victory_ends_combat() -> void:
 	assert_that(game.in_combat).is_false()
 	assert_that(game.enemy_defeated).is_true()
 	assert_that(game.message).contains("Victory")
+
+
+func test_territory_starts_with_local_fog_of_war() -> void:
+	game._handle_click(Vector2(100, 200))
+	assert_that(game.discovered_cells.size()).is_greater_than(0)
+	assert_that(game.is_cell_discovered(game.hero_cell)).is_true()
+	assert_that(game.is_cell_discovered(game.cave_cell)).is_false()
+
+func test_moving_reveals_new_territory() -> void:
+	game._handle_click(Vector2(100, 200))
+	var target := game.hero_cell + Vector2i(1, 0)
+	assert_that(game.is_cell_discovered(target)).is_true()
+	game._handle_click(game.BOARD_ORIGIN + Vector2(target) * game.GRID + Vector2(10, 10))
+	assert_that(game.hero_cell).is_equal(target)
+	assert_that(game.is_cell_discovered(game.hero_cell + Vector2i(2, 0))).is_true()
