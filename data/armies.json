@@ -4,5 +4,5 @@
     "rangers": {"attack":3,"defense":2,"morale":5,"supply_cost":1},
     "knights": {"attack":5,"defense":5,"morale":7,"supply_cost":2}
   },
-  "starter_army": {"name":"The Free Company","commander":"Kael","units":{"levy":20,"rangers":4},"morale":6,"supplies":30}
+  "starter_army": {"name":"The Free Company","commander":"kaela_varyn","units":{"militia":3,"rangers":2},"morale":6,"supplies":30}
 }
