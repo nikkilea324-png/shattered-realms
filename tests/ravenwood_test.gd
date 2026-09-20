@@ -11,7 +11,7 @@ func after_test() -> void:
 		game.queue_free()
 
 func test_ravenwood_loads_as_hex_territory() -> void:
-	game._handle_click(Vector2(1000, 200))
+	game._handle_click(Vector2(450, 400))
 	assert_that(game.mode).is_equal("territory")
 	assert_that(game.selected_territory).is_equal("Ravenwood")
 	assert_that(game.hero_cell).is_equal(Vector2i(8, 5))
