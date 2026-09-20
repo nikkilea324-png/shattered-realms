@@ -17,6 +17,14 @@ var hero_cell := Vector2i(2, 6)
 var cave_cell := Vector2i(11, 3)
 var dungeon_cell := Vector2i(1, 1)
 var message := "Choose a realm to begin."
+var turn_number := 1
+var action_points := 3
+const MAX_ACTION_POINTS := 3
+var hero_hp := 5
+var enemy_cell := Vector2i(8, 4)
+var enemy_hp := 3
+var enemy_defeated := false
+var in_combat := false
 
 var territories := [
 	{"name":"Crownspine","rect":Rect2(55,145,300,220),"kind":"mountain","color":Color("#4d5360")},
@@ -57,7 +65,7 @@ func _is_ui_point(pos: Vector2) -> bool:
 			if t.rect.has_point(pos):
 				return true
 	elif mode == "territory":
-		return Rect2(1025, 625, 190, 52).has_point(pos)
+		return Rect2(1025, 560, 190, 117).has_point(pos)
 	elif mode == "dungeon":
 		return Rect2(1025, 625, 190, 52).has_point(pos)
 	return false
@@ -80,6 +88,10 @@ func _handle_ui_action(action: String) -> void:
 		"return_world":
 			_to_world()
 			queue_redraw()
+		"attack":
+			_attack_enemy()
+		"end_turn":
+			_end_turn()
 		"scout":
 			message = "Scouting complete: a hidden cave lies to the northeast."
 			queue_redraw()
@@ -91,6 +103,12 @@ func _handle_click(pos: Vector2) -> void:
 				selected_territory = t.name
 				mode = "territory"
 				hero_cell = Vector2i(2, 6)
+				turn_number = 1
+				action_points = MAX_ACTION_POINTS
+				hero_hp = 5
+				enemy_hp = 3
+				enemy_defeated = false
+				in_combat = false
 				message = "Scouts report roads, ruins, and something hidden beneath the hills."
 				return
 	elif mode == "territory":
@@ -101,7 +119,18 @@ func _handle_click(pos: Vector2) -> void:
 			return
 		var cell := _cell_at(pos)
 		if _valid_cell(cell):
+			if in_combat:
+				message = "Combat engaged — use ATTACK or END TURN."
+				return
+			if action_points <= 0:
+				message = "No action points remain. End the turn."
+				return
+			if cell == enemy_cell and not enemy_defeated:
+				in_combat = true
+				message = "Tactical encounter! A hostile creature blocks the road."
+				return
 			hero_cell = cell
+			action_points -= 1
 			message = "Cave discovered — enter the dark below." if cell == cave_cell else "The party advances across the frontier."
 	elif mode == "dungeon":
 		if Rect2(1025, 625, 190, 52).has_point(pos):
@@ -116,11 +145,59 @@ func _move_actor(delta: Vector2i) -> void:
 	if mode != "territory" and mode != "dungeon":
 		return
 	if mode == "territory":
-		hero_cell = _clamp_cell(hero_cell + delta)
+		if in_combat:
+			message = "Combat engaged — use ATTACK or END TURN."
+			return
+		if action_points <= 0:
+			message = "No action points remain. End the turn."
+			return
+		var target := _clamp_cell(hero_cell + delta)
+		if target == enemy_cell and not enemy_defeated:
+			in_combat = true
+			message = "Tactical encounter! A hostile creature blocks the road."
+			return
+		hero_cell = target
+		action_points -= 1
 		message = "Cave discovered — enter the dark below." if hero_cell == cave_cell else "The party advances across the frontier."
 	else:
 		dungeon_cell = _clamp_cell(dungeon_cell + delta)
 		message = "RELIC FOUND — the first ancient relic is yours!" if dungeon_cell == Vector2i(5, 4) else "Torchlight reveals old stone, traps, and tracks."
+
+
+func _attack_enemy() -> void:
+	if mode != "territory" or not in_combat or enemy_defeated:
+		return
+	enemy_hp -= 1
+	if enemy_hp <= 0:
+		enemy_hp = 0
+		enemy_defeated = true
+		in_combat = false
+		message = "Victory! The frontier is yours, and the creature leaves behind a bloodied relic."
+		return
+	hero_hp -= 1
+	turn_number += 1
+	action_points = MAX_ACTION_POINTS
+	if hero_hp <= 0:
+		hero_hp = 0
+		in_combat = false
+		message = "Defeat. The party retreats from the frontier."
+	else:
+		message = "Strike lands. The creature counters. Your next turn begins."
+
+func _end_turn() -> void:
+	if mode != "territory":
+		return
+	turn_number += 1
+	action_points = MAX_ACTION_POINTS
+	if in_combat and not enemy_defeated:
+		hero_hp = maxi(hero_hp - 1, 0)
+		if hero_hp == 0:
+			in_combat = false
+			message = "Defeat. The party retreats from the frontier."
+		else:
+			message = "The enemy strikes as you pass the initiative. Your turn begins."
+	else:
+		message = "Turn %d begins. Action points restored." % turn_number
 
 func _cell_at(pos: Vector2) -> Vector2i:
 	var local := pos - BOARD_ORIGIN
@@ -178,9 +255,9 @@ func _draw_territory() -> void:
 	draw_circle(cr.get_center(), 18, Color("#151519"))
 	draw_arc(cr.get_center(), 19, PI, TAU, 14, Color("#96715a"), 4)
 	_draw_actor(hero_cell, "H")
-	if hero_cell == cave_cell:
-		_draw_button("ENTER CAVE", Rect2(1025,625,190,52), true)
-	_draw_panel(Vector2(995,105), Vector2(250,235), "SCOUT REPORT", ["Terrain: frontier","Roads: 2","Ruins: 1","Hidden sites: 1","Hostiles: unknown","","WASD / arrows to move","Tap a tile to move"])
+	if not enemy_defeated:
+		_draw_actor(enemy_cell, "E")
+	_draw_panel(Vector2(995,105), Vector2(250,235), "SCOUT REPORT", ["Terrain: frontier","Roads: 2","Ruins: 1","Hidden sites: 1","Hostiles: %s" % ("defeated" if enemy_defeated else "1 creature"),"Turn: %d" % turn_number,"AP: %d / %d" % [action_points, MAX_ACTION_POINTS],"Hero HP: %d / 5" % hero_hp,("COMBAT: enemy HP %d / 3" % enemy_hp) if in_combat else "","","WASD / arrows to move","Tap a tile to move"])
 
 func _draw_dungeon() -> void:
 	_draw_header("THE HOLLOW BELOW", "DUNGEON  •  EXPLORATION LAYER")
@@ -192,7 +269,6 @@ func _draw_dungeon() -> void:
 	_draw_actor(dungeon_cell, "H")
 	_draw_actor(Vector2i(5,4), "R")
 	_draw_panel(Vector2(995,105), Vector2(250,235), "DUNGEON LOG", ["Depth: 1","Light: 7 turns","Traps: unknown","Enemies: unknown","Relics: 1","","Find the reliquary.","Escape with your loot."])
-	_draw_button("RETURN TO MAP", Rect2(1025,625,190,52), false)
 
 func _draw_grid() -> void:
 	for y in range(BOARD_ROWS):
