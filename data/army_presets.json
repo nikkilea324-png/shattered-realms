@@ -1,0 +1,47 @@
+{
+  "formation_slots": 12,
+  "presets": {
+    "balanced": {
+      "militia": 1,
+      "swordsmen": 3,
+      "spearmen": 2,
+      "archers": 2,
+      "crossbowmen": 1,
+      "knights": 1,
+      "riders": 1,
+      "rangers": 1
+    },
+    "defensive": {
+      "shieldguard": 3,
+      "spearmen": 3,
+      "swordsmen": 2,
+      "crossbowmen": 2,
+      "mages": 1,
+      "siege_engineers": 1
+    },
+    "fast": {
+      "riders": 3,
+      "rangers": 2,
+      "archers": 3,
+      "swordsmen": 2,
+      "knights": 1,
+      "mages": 1
+    },
+    "siege": {
+      "shieldguard": 3,
+      "swordsmen": 2,
+      "spearmen": 2,
+      "crossbowmen": 2,
+      "siege_engineers": 2,
+      "mages": 1
+    },
+    "shock": {
+      "axemen": 4,
+      "knights": 2,
+      "swordsmen": 2,
+      "riders": 2,
+      "spearmen": 1,
+      "mages": 1
+    }
+  }
+}
