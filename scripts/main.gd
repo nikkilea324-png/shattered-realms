@@ -29,7 +29,7 @@ var territories := [
 func _ready() -> void:
 	queue_redraw()
 
-func _unhandled_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
 	# Android sends InputEventScreenTouch rather than a mouse click on a real
 	# touchscreen. Handle both so the same game works on PC and Android.
 	if event is InputEventScreenTouch and event.pressed:
