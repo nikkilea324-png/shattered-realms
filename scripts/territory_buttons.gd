@@ -16,7 +16,7 @@ func _ready() -> void:
 	_rebuild()
 
 func _process(_delta: float) -> void:
-	var game := get_parent()
+	var game: Node2D = get_parent()
 	if game.mode != current_mode:
 		_rebuild()
 	elif game.mode == "territory":
