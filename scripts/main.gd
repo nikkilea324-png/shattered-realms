@@ -44,7 +44,7 @@ var ravenwood_armies := [
 
 var territories := [
 	{"name":"Crownspine","rect":Rect2(55,145,300,220),"kind":"mountain","color":Color("#4d5360")},
-	{"name":"Greenvale","rect":Rect2(325,335,295,225),"kind":"forest","color":Color("#354d3b")},
+	{"name":"Ravenwood","rect":Rect2(325,335,295,225),"kind":"forest","color":Color("#354d3b")},
 	{"name":"Dreadfen","rect":Rect2(610,400,285,205),"kind":"swamp","color":Color("#39483f")},
 	{"name":"Ashen March","rect":Rect2(885,115,300,250),"kind":"waste","color":Color("#5b4b45")},
 	{"name":"Sunreach","rect":Rect2(920,405,270,200),"kind":"desert","color":Color("#806d4b")}
