@@ -1,0 +1,324 @@
+{
+  "formation_slots": 12,
+  "unit_types": {
+    "militia": {
+      "name": "Militia",
+      "role": "Cheap infantry",
+      "strong_against": [
+        "light_troops"
+      ],
+      "weak_against": [
+        "almost_everything"
+      ],
+      "recruitment": "very_cheap",
+      "upkeep": "very_low",
+      "training": "fast",
+      "stats": {
+        "attack": 35,
+        "defense": 30,
+        "health": 60,
+        "speed": 5,
+        "range": 1,
+        "morale": 40
+      },
+      "abilities": {
+        "numbers": "Small combat bonus when deployed in large numbers.",
+        "local_defense": "+25% defense in home territory.",
+        "emergency_levy": "Can be recruited extremely quickly during wartime."
+      }
+    },
+    "spearmen": {
+      "name": "Spearmen",
+      "role": "Anti-cavalry",
+      "strong_against": [
+        "cavalry"
+      ],
+      "weak_against": [
+        "archers"
+      ],
+      "recruitment": "cheap",
+      "upkeep": "low",
+      "training": "medium",
+      "stats": {
+        "attack": 50,
+        "defense": 60,
+        "health": 90,
+        "speed": 4,
+        "range": 1,
+        "morale": 60
+      },
+      "abilities": {
+        "brace": "Greatly reduces incoming cavalry charge damage.",
+        "spear_wall": "Multiple spear units supporting one another gain additional defense.",
+        "hold_formation": "Reduced knockback and retreat effects."
+      }
+    },
+    "swordsmen": {
+      "name": "Swordsmen",
+      "role": "Heavy infantry",
+      "strong_against": [
+        "infantry"
+      ],
+      "weak_against": [
+        "armor_piercing"
+      ],
+      "recruitment": "medium",
+      "upkeep": "medium",
+      "training": "medium",
+      "stats": {
+        "attack": 70,
+        "defense": 65,
+        "health": 110,
+        "speed": 5,
+        "range": 1,
+        "morale": 70
+      },
+      "abilities": {
+        "disciplined": "Less vulnerable to morale loss.",
+        "formation_fighting": "Gains defense adjacent to friendly infantry.",
+        "veteran": "Experienced units gain additional attack and defense."
+      }
+    },
+    "shieldguard": {
+      "name": "Shieldguard",
+      "role": "Defensive infantry",
+      "strong_against": [
+        "melee",
+        "ranged"
+      ],
+      "weak_against": [],
+      "recruitment": "expensive",
+      "upkeep": "medium_high",
+      "training": "slow",
+      "stats": {
+        "attack": 45,
+        "defense": 95,
+        "health": 150,
+        "speed": 3,
+        "range": 1,
+        "morale": 90
+      },
+      "abilities": {
+        "shield_wall": "Massive ranged-damage reduction.",
+        "anchor": "Cannot be easily pushed or routed.",
+        "protect": "Can absorb part of damage directed at adjacent units."
+      }
+    },
+    "axemen": {
+      "name": "Axemen",
+      "role": "Shock infantry",
+      "strong_against": [
+        "armor"
+      ],
+      "weak_against": [
+        "spears"
+      ],
+      "recruitment": "medium",
+      "upkeep": "medium",
+      "training": "medium",
+      "stats": {
+        "attack": 90,
+        "defense": 55,
+        "health": 115,
+        "speed": 5,
+        "range": 1,
+        "morale": 80
+      },
+      "abilities": {
+        "armor_break": "Deals increased damage against heavily armored units.",
+        "cleave": "Attacks can damage multiple nearby enemies.",
+        "frenzy": "Gains attack after killing an enemy."
+      }
+    },
+    "knights": {
+      "name": "Knights",
+      "role": "Heavy cavalry",
+      "strong_against": [
+        "infantry"
+      ],
+      "weak_against": [
+        "spears"
+      ],
+      "recruitment": "very_expensive",
+      "upkeep": "high",
+      "training": "very_slow",
+      "stats": {
+        "attack": 100,
+        "defense": 85,
+        "health": 160,
+        "speed": 9,
+        "range": 1,
+        "morale": 95
+      },
+      "abilities": {
+        "devastating_charge": "Massive bonus damage when initiating combat.",
+        "heavy_armor": "High resistance to normal attacks.",
+        "breakthrough": "Can continue moving after defeating a weakened enemy unit."
+      }
+    },
+    "riders": {
+      "name": "Riders",
+      "role": "Light cavalry",
+      "strong_against": [
+        "archers",
+        "scouts"
+      ],
+      "weak_against": [
+        "heavy_infantry"
+      ],
+      "recruitment": "medium",
+      "upkeep": "medium",
+      "training": "fast",
+      "stats": {
+        "attack": 65,
+        "defense": 45,
+        "health": 90,
+        "speed": 11,
+        "range": 1,
+        "morale": 65
+      },
+      "abilities": {
+        "flanking": "Bonus damage from the side or rear.",
+        "pursuit": "Excellent at destroying retreating units.",
+        "raid": "Can attack enemy supply lines."
+      }
+    },
+    "archers": {
+      "name": "Archers",
+      "role": "Ranged",
+      "strong_against": [
+        "light_troops"
+      ],
+      "weak_against": [
+        "cavalry"
+      ],
+      "recruitment": "cheap_medium",
+      "upkeep": "medium",
+      "training": "medium",
+      "stats": {
+        "attack": 55,
+        "defense": 25,
+        "health": 65,
+        "speed": 5,
+        "range": 8,
+        "morale": 55
+      },
+      "abilities": {
+        "volley": "Multiple archers fire simultaneously for increased damage.",
+        "high_ground": "Increased range and accuracy from elevated terrain.",
+        "focus_fire": "Multiple archer units attacking the same target become more effective."
+      }
+    },
+    "crossbowmen": {
+      "name": "Crossbowmen",
+      "role": "Armor-piercing ranged",
+      "strong_against": [
+        "heavy_armor"
+      ],
+      "weak_against": [
+        "cavalry"
+      ],
+      "recruitment": "medium_high",
+      "upkeep": "medium",
+      "training": "slow",
+      "stats": {
+        "attack": 80,
+        "defense": 35,
+        "health": 70,
+        "speed": 4,
+        "range": 7,
+        "morale": 60
+      },
+      "abilities": {
+        "armor_piercing": "Ignores part of enemy armor.",
+        "heavy_bolt": "Bonus damage against cavalry and heavy infantry.",
+        "steady_aim": "Accuracy increases if the unit does not move."
+      }
+    },
+    "rangers": {
+      "name": "Rangers",
+      "role": "Mobile ranged",
+      "strong_against": [
+        "scouts",
+        "archers"
+      ],
+      "weak_against": [
+        "heavy_infantry"
+      ],
+      "recruitment": "expensive",
+      "upkeep": "medium_high",
+      "training": "slow",
+      "stats": {
+        "attack": 75,
+        "defense": 45,
+        "health": 80,
+        "speed": 8,
+        "range": 8,
+        "morale": 75
+      },
+      "abilities": {
+        "camouflage": "Harder for enemies to detect.",
+        "ambush": "Massive bonus damage from concealment.",
+        "skirmish": "Can attack and retreat without normal retaliation penalty.",
+        "forest_walker": "No movement penalty in forests."
+      }
+    },
+    "siege_engineers": {
+      "name": "Siege Engineers",
+      "role": "Siege/support",
+      "strong_against": [
+        "fortifications"
+      ],
+      "weak_against": [
+        "direct_combat"
+      ],
+      "recruitment": "expensive",
+      "upkeep": "medium",
+      "training": "slow",
+      "stats": {
+        "attack": 15,
+        "defense": 25,
+        "health": 70,
+        "speed": 3,
+        "siege_power": 100,
+        "morale": 40
+      },
+      "abilities": {
+        "build_siege_weapons": "Constructs catapults, ballistae and siege towers.",
+        "repair": "Repairs friendly siege equipment.",
+        "fortification_expert": "Improves friendly defensive structures.",
+        "mining": "Can undermine enemy walls during sieges."
+      }
+    },
+    "mages": {
+      "name": "Mages",
+      "role": "Magical support",
+      "strong_against": [
+        "groups",
+        "special_units"
+      ],
+      "weak_against": [
+        "anti_magic"
+      ],
+      "recruitment": "very_expensive",
+      "upkeep": "very_high",
+      "training": "very_slow",
+      "stats": {
+        "attack": 85,
+        "defense": 20,
+        "health": 60,
+        "speed": 5,
+        "range": 9,
+        "morale": 65,
+        "magic": 100
+      },
+      "abilities": {
+        "fireball": "Area damage against clustered enemies.",
+        "frostbind": "Slows enemy units.",
+        "arcane_shield": "Protects friendly units.",
+        "chain_lightning": "Can jump between multiple enemy units.",
+        "ritual": "Powerful spells require multiple turns or mana."
+      }
+    }
+  }
+}
