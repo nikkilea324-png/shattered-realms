@@ -33,9 +33,11 @@ func _input(event: InputEvent) -> void:
 	# Android sends InputEventScreenTouch rather than a mouse click on a real
 	# touchscreen. Handle both so the same game works on PC and Android.
 	if event is InputEventScreenTouch and event.pressed:
-		_handle_click(event.position)
+		if not _is_ui_point(event.position):
+			_handle_click(event.position)
 	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		_handle_click(event.position)
+		if not _is_ui_point(event.position):
+			_handle_click(event.position)
 	elif event is InputEventKey and event.pressed:
 		match event.keycode:
 			KEY_ESCAPE:
@@ -48,6 +50,39 @@ func _input(event: InputEvent) -> void:
 				_move_actor(Vector2i(-1, 0))
 			KEY_D, KEY_RIGHT:
 				_move_actor(Vector2i(1, 0))
+
+func _is_ui_point(pos: Vector2) -> bool:
+	if mode == "world":
+		for t in territories:
+			if t.rect.has_point(pos):
+				return true
+	elif mode == "territory":
+		return Rect2(1025, 625, 190, 52).has_point(pos)
+	elif mode == "dungeon":
+		return Rect2(1025, 625, 190, 52).has_point(pos)
+	return false
+
+func _handle_ui_action(action: String) -> void:
+	match action:
+		"territory":
+			var center := Vector2.ZERO
+			for t in territories:
+				if t.name == selected_territory:
+					center = t.rect.get_center()
+					break
+			_handle_click(center)
+		"enter_cave":
+			if mode == "territory" and hero_cell == cave_cell:
+				mode = "dungeon"
+				dungeon_cell = Vector2i(1, 1)
+				message = "The cave descends into a forgotten dungeon."
+				queue_redraw()
+		"return_world":
+			_to_world()
+			queue_redraw()
+		"scout":
+			message = "Scouting complete: a hidden cave lies to the northeast."
+			queue_redraw()
 
 func _handle_click(pos: Vector2) -> void:
 	if mode == "world":
