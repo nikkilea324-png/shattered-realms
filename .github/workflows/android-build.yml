@@ -28,6 +28,24 @@ jobs:
         run: |
           sdkmanager "platform-tools" "build-tools;35.0.0" "platforms;android-35"
 
+      - name: Configure Godot Android settings
+        run: |
+          mkdir -p "$HOME/.config/godot" "$HOME/.android"
+          if [ ! -f "$HOME/.android/debug.keystore" ]; then
+            keytool -genkeypair -v -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          fi
+          cat > "$HOME/.config/godot/editor_settings-4.tres" <<EOF
+          [gd_resource type="EditorSettings" format=3]
+
+          [resource]
+
+          export/android/android_sdk_path = "/usr/local/lib/android/sdk"
+          export/android/java_sdk_path = "$JAVA_HOME"
+          export/android/debug_keystore = "$HOME/.android/debug.keystore"
+          export/android/debug_keystore_user = "androiddebugkey"
+          export/android/debug_keystore_pass = "android"
+          EOF
+
       - name: Export APK
         # Pin to a known-good commit of the Godot export action.
         uses: NodotProject/godot-export@0e3422217e73e94c704ae8b2c4cd142907139afb
@@ -37,6 +55,7 @@ jobs:
           relative_project_path: ./
           use_preset_export_path: true
           presets_to_export: Android
+          export_debug: true
           verbose: true
 
       - name: Upload APK
