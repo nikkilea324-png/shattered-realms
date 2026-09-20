@@ -36,3 +36,38 @@ func test_territory_button_layer_is_present_and_touch_layer_is_transparent() -> 
 	var button_layer := game.get_node("TerritoryButtons")
 	assert_that(touch_layer.mouse_filter).is_equal(Control.MOUSE_FILTER_IGNORE)
 	assert_that(button_layer.get_child_count()).is_equal(5)
+
+func test_turn_based_movement_consumes_action_points() -> void:
+	game._handle_click(Vector2(100, 200))
+	assert_that(game.action_points).is_equal(3)
+	var start := game.hero_cell
+	game._handle_click(game.BOARD_ORIGIN + Vector2(start + Vector2i(1, 0)) * game.GRID + Vector2(10, 10))
+	assert_that(game.hero_cell).is_equal(start + Vector2i(1, 0))
+	assert_that(game.action_points).is_equal(2)
+
+func test_enemy_contact_starts_tactical_encounter() -> void:
+	game._handle_click(Vector2(100, 200))
+	game.hero_cell = game.enemy_cell + Vector2i(-1, 0)
+	game.action_points = 3
+	game._handle_click(game.BOARD_ORIGIN + Vector2(game.enemy_cell) * game.GRID + Vector2(10, 10))
+	assert_that(game.in_combat).is_true()
+	assert_that(game.message).contains("Tactical encounter")
+
+func test_attack_and_enemy_turn_progress_combat() -> void:
+	game._handle_click(Vector2(100, 200))
+	game.in_combat = true
+	game.enemy_hp = 2
+	game.hero_hp = 5
+	game._handle_ui_action("attack")
+	assert_that(game.enemy_hp).is_equal(1)
+	assert_that(game.hero_hp).is_equal(4)
+	assert_that(game.turn_number).is_equal(2)
+
+func test_victory_ends_combat() -> void:
+	game._handle_click(Vector2(100, 200))
+	game.in_combat = true
+	game.enemy_hp = 1
+	game._handle_ui_action("attack")
+	assert_that(game.in_combat).is_false()
+	assert_that(game.enemy_defeated).is_true()
+	assert_that(game.message).contains("Victory")
