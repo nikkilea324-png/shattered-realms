@@ -26,6 +26,10 @@ var enemy_hp := 3
 var enemy_defeated := false
 var in_combat := false
 var discovered_cells: Dictionary = {}
+var player_army := ArmyState.new()
+var tactical_battle: TacticalBattleState
+var selected_attack_unit := "swordsmen"
+var selected_target_unit := "shieldguard"
 
 var territories := [
 	{"name":"Crownspine","rect":Rect2(55,145,300,220),"kind":"mountain","color":Color("#4d5360")},
@@ -36,6 +40,7 @@ var territories := [
 ]
 
 func _ready() -> void:
+	player_army.units = {"militia":1,"swordsmen":3,"spearmen":2,"archers":2,"crossbowmen":1,"knights":1,"riders":1,"rangers":1}
 	queue_redraw()
 
 func _input(event: InputEvent) -> void:
@@ -110,6 +115,9 @@ func _handle_click(pos: Vector2) -> void:
 				enemy_hp = 3
 				enemy_defeated = false
 				in_combat = false
+				tactical_battle = null
+				selected_attack_unit = "swordsmen"
+				selected_target_unit = "shieldguard"
 				discovered_cells.clear()
 				_reveal_around(hero_cell, 2)
 				message = "Scouts report roads, ruins, and something hidden beneath the hills."
@@ -129,8 +137,7 @@ func _handle_click(pos: Vector2) -> void:
 				message = "No action points remain. End the turn."
 				return
 			if cell == enemy_cell and not enemy_defeated:
-				in_combat = true
-				message = "Tactical encounter! A hostile creature blocks the road."
+				_start_tactical_encounter()
 				return
 			hero_cell = cell
 			action_points -= 1
@@ -159,8 +166,7 @@ func _move_actor(delta: Vector2i) -> void:
 			return
 		var target := _clamp_cell(hero_cell + delta)
 		if target == enemy_cell and not enemy_defeated:
-			in_combat = true
-			message = "Tactical encounter! A hostile creature blocks the road."
+			_start_tactical_encounter()
 			return
 		hero_cell = target
 		action_points -= 1
@@ -173,26 +179,41 @@ func _move_actor(delta: Vector2i) -> void:
 		queue_redraw()
 
 
-func _attack_enemy() -> void:
-	if mode != "territory" or not in_combat or enemy_defeated:
+func _start_tactical_encounter() -> void:
+	if tactical_battle != null:
 		return
-	enemy_hp -= 1
-	if enemy_hp <= 0:
-		enemy_hp = 0
-		enemy_defeated = true
-		in_combat = false
-		message = "Victory! The frontier is yours, and the creature leaves behind a bloodied relic."
+	tactical_battle = TacticalBattleState.new()
+	var enemy_force := {"shieldguard":1,"spearmen":2,"archers":1,"riders":1}
+	tactical_battle.setup(player_army.units, enemy_force, "forest")
+	in_combat = true
+	message = "TACTICAL BATTLE — break the enemy formation."
+	queue_redraw()
+
+func _attack_enemy() -> void:
+	if mode != "territory" or not in_combat or tactical_battle == null:
+		return
+	if not tactical_battle.player_units.has(selected_attack_unit):
+		selected_attack_unit = tactical_battle.player_units.keys()[0]
+	if not tactical_battle.enemy_units.has(selected_target_unit):
+		selected_target_unit = tactical_battle.enemy_units.keys()[0]
+	var result := tactical_battle.attack("player", selected_attack_unit, selected_target_unit)
+	if not bool(result.get("ok", false)):
+		message = str(result.get("message", "Attack failed."))
 		queue_redraw()
 		return
-	hero_hp -= 1
-	turn_number += 1
-	action_points = MAX_ACTION_POINTS
-	if hero_hp <= 0:
+	message = str(result.get("message", "Attack resolved."))
+	if tactical_battle.victory:
+		enemy_defeated = true
+		in_combat = false
+		message = "VICTORY — enemy formation shattered. The frontier is yours."
+	elif tactical_battle.defeat:
 		hero_hp = 0
 		in_combat = false
-		message = "Defeat. The party retreats from the frontier."
+		message = "DEFEAT — your army has been destroyed."
 	else:
-		message = "Strike lands. The creature counters. Your next turn begins."
+		tactical_battle.end_turn()
+		turn_number = tactical_battle.turn
+		action_points = MAX_ACTION_POINTS
 	queue_redraw()
 
 func _end_turn() -> void:
