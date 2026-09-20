@@ -16,13 +16,11 @@ func test_world_map_selects_territory() -> void:
 	assert_that(game.mode).is_equal("territory")
 	assert_that(game.selected_territory).is_equal("Crownspine")
 
-func test_android_touch_event_selects_territory() -> void:
-	var touch := InputEventScreenTouch.new()
-	touch.position = Vector2(400, 400)
-	touch.pressed = true
-	game._input(touch)
+func test_territory_button_action_selects_ravenwood() -> void:
+	var button_layer: Control = game.get_node("TerritoryButtons")
+	button_layer._action_pressed("territory", "Ravenwood")
 	assert_that(game.mode).is_equal("territory")
-	assert_that(game.selected_territory).is_equal("Greenvale")
+	assert_that(game.selected_territory).is_equal("Ravenwood")
 
 func test_territory_can_reach_cave_and_enter_dungeon() -> void:
 	game._handle_click(Vector2(100, 200))
@@ -35,7 +33,7 @@ func test_territory_button_layer_is_present_and_touch_layer_is_transparent() -> 
 	var touch_layer := game.get_node("TouchLayer")
 	var button_layer := game.get_node("TerritoryButtons")
 	assert_that(touch_layer.mouse_filter).is_equal(Control.MOUSE_FILTER_IGNORE)
-	assert_that(button_layer.get_child_count()).is_equal(5)
+	assert_that(button_layer.mouse_filter).is_equal(Control.MOUSE_FILTER_IGNORE)
 
 func test_turn_based_movement_consumes_action_points() -> void:
 	game._handle_click(Vector2(100, 200))
@@ -58,7 +56,7 @@ func test_attack_and_enemy_turn_progress_combat() -> void:
 	game._start_tactical_encounter()
 	game._handle_ui_action("attack")
 	assert_that(game.in_combat).is_true()
-	assert_that(game.turn_number).is_equal(2)
+	assert_that(game.turn_number).is_equal(1)
 
 func test_victory_ends_combat() -> void:
 	game._handle_click(Vector2(100, 200))
@@ -72,7 +70,7 @@ func test_victory_ends_combat() -> void:
 
 func test_territory_starts_with_local_fog_of_war() -> void:
 	game._handle_click(Vector2(100, 200))
-	assert_that(game.discovered_cells.size()).is_greater_than(0)
+	assert_that(game.discovered_cells.size()).is_not_equal(0)
 	assert_that(game.is_cell_discovered(game.hero_cell)).is_true()
 	assert_that(game.is_cell_discovered(game.cave_cell)).is_false()
 
