@@ -58,6 +58,22 @@ jobs:
           export_debug: true
           verbose: true
 
+      - name: Locate and stage APK
+        shell: bash
+        run: |
+          set -e
+          mkdir -p build
+          echo "Searching for exported APK..."
+          find . -type f -name "*.apk" -print
+          apk="$(find . -type f -name "*.apk" | head -n 1)"
+          if [ -z "$apk" ]; then
+            echo "ERROR: Godot export completed but no APK file was found."
+            exit 1
+          fi
+          echo "Staging APK from: $apk"
+          cp "$apk" build/ShatteredRealms.apk
+          ls -lh build/ShatteredRealms.apk
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
