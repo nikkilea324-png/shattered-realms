@@ -10,9 +10,9 @@ const GRID := 56
 const BOARD_ORIGIN := Vector2(80, 105)
 const BOARD_COLS := 16
 const BOARD_ROWS := 9
-const HEX_SIZE := 27.0
-const RAVEN_COLS := 17
-const RAVEN_ROWS := 10
+const HEX_SIZE := 20.0
+const RAVEN_COLS := 24
+const RAVEN_ROWS := 16
 
 var mode := "world"
 var selected_territory := ""
@@ -22,7 +22,7 @@ var dungeon_cell := Vector2i(1, 1)
 var message := "Choose a realm to begin."
 var turn_number := 1
 var action_points := 3
-const MAX_ACTION_POINTS := 3
+const MAX_ACTION_POINTS := 6
 var hero_hp := 5
 var enemy_cell := Vector2i(8, 4)
 var enemy_hp := 3
@@ -36,10 +36,10 @@ var selected_target_unit := "shieldguard"
 var ravenwood_terrain: Dictionary = {}
 var ravenwood_locations: Dictionary = {}
 var ravenwood_armies := [
-	{"name":"Kaela Varyn","role":"Defensive Army","cell":Vector2i(8,5),"icon":"K"},
-	{"name":"Edrin Vale","role":"Ranger Party","cell":Vector2i(3,3),"icon":"E"},
-	{"name":"Hakon Blood-Eye","role":"Raiding Army","cell":Vector2i(12,8),"icon":"H"},
-	{"name":"Nyra Vex","role":"Scout","cell":Vector2i(6,6),"icon":"N"}
+	{"name":"Kaela Varyn","role":"Defensive Army","cell":Vector2i(11,7),"icon":"K"},
+	{"name":"Edrin Vale","role":"Ranger Party","cell":Vector2i(4,4),"icon":"E"},
+	{"name":"Hakon Blood-Eye","role":"Raiding Army","cell":Vector2i(17,12),"icon":"H"},
+	{"name":"Nyra Vex","role":"Scout","cell":Vector2i(8,10),"icon":"N"}
 ]
 
 var territories := [
@@ -120,10 +120,10 @@ func _handle_click(pos: Vector2) -> void:
 			if t.rect.has_point(pos):
 				selected_territory = t.name
 				mode = "territory"
-				hero_cell = Vector2i(8, 5) if t.name == "Ravenwood" else Vector2i(2, 6)
+				hero_cell = Vector2i(11, 7) if t.name == "Ravenwood" else Vector2i(2, 6)
 				if t.name == "Ravenwood":
-					cave_cell = Vector2i(5, 7)
-					enemy_cell = Vector2i(9, 8)
+					cave_cell = Vector2i(7, 12)
+					enemy_cell = Vector2i(15, 11)
 				turn_number = 1
 				action_points = MAX_ACTION_POINTS
 				hero_hp = 5
@@ -282,8 +282,8 @@ func _load_ravenwood() -> void:
 		ravenwood_locations = parsed.get("locations", {})
 
 func _raven_hex_center(cell: Vector2i) -> Vector2:
-	var x := BOARD_ORIGIN.x + 42.0 + float(cell.x) * (HEX_SIZE * 1.5)
-	var y := BOARD_ORIGIN.y + 34.0 + float(cell.y) * (HEX_SIZE * 1.73) + (21.0 if cell.x % 2 == 1 else 0.0)
+	var x := BOARD_ORIGIN.x + 30.0 + float(cell.x) * (HEX_SIZE * 1.5)
+	var y := BOARD_ORIGIN.y + 24.0 + float(cell.y) * (HEX_SIZE * 1.73) + (17.0 if cell.x % 2 == 1 else 0.0)
 	return Vector2(x,y)
 
 func _raven_hex_at(pos: Vector2) -> Vector2i:
@@ -299,14 +299,18 @@ func _raven_hex_at(pos: Vector2) -> Vector2i:
 	return best if best_dist <= HEX_SIZE * HEX_SIZE * 2.0 else Vector2i(-99,-99)
 
 func _raven_terrain_at(cell: Vector2i) -> String:
-	if cell.x <= 2 and cell.y >= 2:
+	if cell.x <= 3 and cell.y >= 3:
 		return "mountain"
-	if cell.x >= 14 and cell.y >= 2:
+	if cell.x >= 20 and cell.y >= 3:
 		return "marsh"
-	if cell.y <= 1 or (cell.x <= 4 and cell.y <= 4):
+	if cell.x >= 16 and cell.y <= 4:
+		return "plains"
+	if cell.y <= 3 or (cell.x <= 7 and cell.y <= 7):
 		return "forest"
-	if cell.x >= 5 and cell.x <= 12 and cell.y >= 2 and cell.y <= 7:
+	if cell.x >= 7 and cell.x <= 18 and cell.y >= 4 and cell.y <= 12:
 		return "forest"
+	if cell.x >= 4 and cell.y >= 11:
+		return "hills"
 	return "plains"
 
 func is_cell_discovered(cell: Vector2i) -> bool:
@@ -320,6 +324,8 @@ func _reveal_around(center: Vector2i, radius: int) -> void:
 				discovered_cells[cell] = true
 
 func _clamp_cell(cell: Vector2i) -> Vector2i:
+	if mode == "territory" and selected_territory == "Ravenwood":
+		return Vector2i(clampi(cell.x, 0, RAVEN_COLS - 1), clampi(cell.y, 0, RAVEN_ROWS - 1))
 	return Vector2i(clampi(cell.x, 0, BOARD_COLS - 1), clampi(cell.y, 0, BOARD_ROWS - 1))
 
 func _to_world() -> void:
@@ -375,9 +381,9 @@ func _draw_ravenwood() -> void:
 				"marsh": base = Color("#31473e")
 				"plains": base = Color("#5a583f")
 			_draw_hex(_raven_hex_center(cell), base, cell == hero_cell)
-	var road := PackedVector2Array([_raven_hex_center(Vector2i(8,5)),_raven_hex_center(Vector2i(8,3)),_raven_hex_center(Vector2i(9,2)),_raven_hex_center(Vector2i(10,0))])
+	var road := PackedVector2Array([_raven_hex_center(Vector2i(11,7)),_raven_hex_center(Vector2i(11,5)),_raven_hex_center(Vector2i(12,3)),_raven_hex_center(Vector2i(15,2)),_raven_hex_center(Vector2i(18,1))])
 	draw_polyline(road, Color("#8b7658"), 7)
-	var river := PackedVector2Array([_raven_hex_center(Vector2i(13,2)),_raven_hex_center(Vector2i(14,4)),_raven_hex_center(Vector2i(13,6)),_raven_hex_center(Vector2i(14,8)),_raven_hex_center(Vector2i(13,9))])
+	var river := PackedVector2Array([_raven_hex_center(Vector2i(19,1)),_raven_hex_center(Vector2i(20,4)),_raven_hex_center(Vector2i(21,7)),_raven_hex_center(Vector2i(20,10)),_raven_hex_center(Vector2i(22,13)),_raven_hex_center(Vector2i(21,15))])
 	draw_polyline(river, Color("#375f69"), 11)
 	_draw_raven_fog()
 	for id in ravenwood_locations:
@@ -390,7 +396,7 @@ func _draw_ravenwood() -> void:
 	for army in ravenwood_armies:
 		if is_cell_discovered(army.cell):
 			_draw_commander_piece(army)
-	_draw_panel(Vector2(995,105), Vector2(250,250), "RAVENWOOD", ["Capital: Oakenheart","Forest: +1 defense / ambush","Plains: 1 movement","Mountain: 3 movement / +2 defense","Marsh: 3 movement","Turn: %d" % turn_number,"AP: %d / %d" % [action_points, MAX_ACTION_POINTS],"Commanders: 4","Hidden dungeon: %s" % ("revealed" if is_cell_discovered(Vector2i(5,7)) else "unknown")])
+	_draw_panel(Vector2(995,105), Vector2(250,250), "RAVENWOOD", ["Capital: Oakenheart","Forest: +1 defense / ambush","Plains: 1 movement","Mountain: 3 movement / +2 defense","Marsh: 3 movement","Turn: %d" % turn_number,"AP: %d / %d" % [action_points, MAX_ACTION_POINTS],"Commanders: 4","Hidden dungeon: %s" % ("revealed" if is_cell_discovered(Vector2i(7,12)) else "unknown")])
 
 func _draw_hex(center: Vector2, fill: Color, selected: bool = false) -> void:
 	var pts := PackedVector2Array()
