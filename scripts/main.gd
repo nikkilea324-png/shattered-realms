@@ -129,8 +129,8 @@ func _handle_click(pos: Vector2) -> void:
 					cave_cell = Vector2i(7, 12)
 					enemy_cell = Vector2i(15, 11)
 				turn_number = 1
-				action_points = MAX_ACTION_POINTS
 				movement_remaining = _territory_movement_allowance()
+				action_points = movement_remaining
 				hero_hp = 5
 				enemy_hp = 3
 				enemy_defeated = false
@@ -256,8 +256,8 @@ func _end_turn() -> void:
 	if mode != "territory":
 		return
 	turn_number += 1
-	action_points = MAX_ACTION_POINTS
 	movement_remaining = _territory_movement_allowance()
+	action_points = movement_remaining
 	if in_combat and not enemy_defeated:
 		hero_hp = maxi(hero_hp - 1, 0)
 		if hero_hp == 0:
@@ -320,6 +320,39 @@ func _raven_terrain_at(cell: Vector2i) -> String:
 	if cell.x >= 4 and cell.y >= 11:
 		return "hills"
 	return "plains"
+
+func _raven_neighbors(cell: Vector2i) -> Array[Vector2i]:
+	var result: Array[Vector2i] = []
+	var offsets: Array[Vector2i]
+	if cell.x % 2 == 0:
+		offsets = [Vector2i(-1,-1), Vector2i(0,-1), Vector2i(1,-1), Vector2i(-1,0), Vector2i(1,0), Vector2i(0,1)]
+	else:
+		offsets = [Vector2i(0,-1), Vector2i(1,0), Vector2i(1,1), Vector2i(0,1), Vector2i(-1,1), Vector2i(-1,0)]
+	for offset in offsets:
+		var neighbor := cell + offset
+		if _valid_raven_cell(neighbor):
+			result.append(neighbor)
+	return result
+
+func _valid_raven_cell(cell: Vector2i) -> bool:
+	return cell.x >= 0 and cell.x < RAVEN_COLS and cell.y >= 0 and cell.y < RAVEN_ROWS
+
+func _raven_movement_cost(cell: Vector2i) -> int:
+	var road_cells := [
+		Vector2i(11,7), Vector2i(11,6), Vector2i(11,5),
+		Vector2i(12,4), Vector2i(12,3), Vector2i(13,3),
+		Vector2i(14,2), Vector2i(15,2), Vector2i(16,2),
+		Vector2i(17,1), Vector2i(18,1)
+	]
+	if road_cells.has(cell):
+		return 1
+	match _raven_terrain_at(cell):
+		"plains":
+			return 1
+		"forest", "hills", "mountain", "marsh":
+			return 2
+		_:
+			return 2
 
 func is_cell_discovered(cell: Vector2i) -> bool:
 	return discovered_cells.has(cell)
