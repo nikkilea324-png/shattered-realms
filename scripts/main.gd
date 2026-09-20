@@ -25,6 +25,7 @@ var enemy_cell := Vector2i(8, 4)
 var enemy_hp := 3
 var enemy_defeated := false
 var in_combat := false
+var discovered_cells: Dictionary = {}
 
 var territories := [
 	{"name":"Crownspine","rect":Rect2(55,145,300,220),"kind":"mountain","color":Color("#4d5360")},
@@ -109,6 +110,8 @@ func _handle_click(pos: Vector2) -> void:
 				enemy_hp = 3
 				enemy_defeated = false
 				in_combat = false
+				discovered_cells.clear()
+				_reveal_around(hero_cell, 2)
 				message = "Scouts report roads, ruins, and something hidden beneath the hills."
 				return
 	elif mode == "territory":
@@ -131,6 +134,7 @@ func _handle_click(pos: Vector2) -> void:
 				return
 			hero_cell = cell
 			action_points -= 1
+			_reveal_around(hero_cell, 2)
 			message = "Cave discovered — enter the dark below." if cell == cave_cell else "The party advances across the frontier."
 			queue_redraw()
 	elif mode == "dungeon":
@@ -160,6 +164,7 @@ func _move_actor(delta: Vector2i) -> void:
 			return
 		hero_cell = target
 		action_points -= 1
+		_reveal_around(hero_cell, 2)
 		message = "Cave discovered — enter the dark below." if hero_cell == cave_cell else "The party advances across the frontier."
 		queue_redraw()
 	else:
@@ -213,6 +218,16 @@ func _cell_at(pos: Vector2) -> Vector2i:
 func _valid_cell(cell: Vector2i) -> bool:
 	return cell.x >= 0 and cell.x < BOARD_COLS and cell.y >= 0 and cell.y < BOARD_ROWS
 
+func is_cell_discovered(cell: Vector2i) -> bool:
+	return discovered_cells.has(cell)
+
+func _reveal_around(center: Vector2i, radius: int) -> void:
+	for y in range(center.y - radius, center.y + radius + 1):
+		for x in range(center.x - radius, center.x + radius + 1):
+			var cell := Vector2i(x, y)
+			if _valid_cell(cell) and abs(x - center.x) + abs(y - center.y) <= radius:
+				discovered_cells[cell] = true
+
 func _clamp_cell(cell: Vector2i) -> Vector2i:
 	return Vector2i(clampi(cell.x, 0, BOARD_COLS - 1), clampi(cell.y, 0, BOARD_ROWS - 1))
 
@@ -257,14 +272,25 @@ func _draw_territory() -> void:
 	draw_line(BOARD_ORIGIN + Vector2(0,6.5) * GRID, BOARD_ORIGIN + Vector2(15,6.5) * GRID, Color("#6e624f"), 10)
 	draw_line(BOARD_ORIGIN + Vector2(0,6.5) * GRID, BOARD_ORIGIN + Vector2(15,6.5) * GRID, Color("#3b352d"), 6)
 	draw_line(BOARD_ORIGIN + Vector2(8,0) * GRID, BOARD_ORIGIN + Vector2(9,9) * GRID, Color("#294653"), 13)
-	# hidden cave
-	var cr := Rect2(BOARD_ORIGIN + Vector2(cave_cell) * GRID, Vector2(GRID, GRID))
-	draw_circle(cr.get_center(), 18, Color("#151519"))
-	draw_arc(cr.get_center(), 19, PI, TAU, 14, Color("#96715a"), 4)
-	_draw_actor(hero_cell, "H")
-	if not enemy_defeated:
+	# Hidden points remain unseen until the party explores nearby.
+	if is_cell_discovered(cave_cell):
+		var cr := Rect2(BOARD_ORIGIN + Vector2(cave_cell) * GRID, Vector2(GRID, GRID))
+		draw_circle(cr.get_center(), 18, Color("#151519"))
+		draw_arc(cr.get_center(), 19, PI, TAU, 14, Color("#96715a"), 4)
+	if not enemy_defeated and is_cell_discovered(enemy_cell):
 		_draw_actor(enemy_cell, "E")
+	_draw_fog_overlay()
+	_draw_actor(hero_cell, "H")
 	_draw_panel(Vector2(995,105), Vector2(250,235), "SCOUT REPORT", ["Terrain: frontier","Roads: 2","Ruins: 1","Hidden sites: 1","Hostiles: %s" % ("defeated" if enemy_defeated else "1 creature"),"Turn: %d" % turn_number,"AP: %d / %d" % [action_points, MAX_ACTION_POINTS],"Hero HP: %d / 5" % hero_hp,("COMBAT: enemy HP %d / 3" % enemy_hp) if in_combat else "","","WASD / arrows to move","Tap a tile to move"])
+
+func _draw_fog_overlay() -> void:
+	for y in range(BOARD_ROWS):
+		for x in range(BOARD_COLS):
+			var cell := Vector2i(x, y)
+			if not is_cell_discovered(cell):
+				var r := Rect2(BOARD_ORIGIN + Vector2(cell) * GRID, Vector2(GRID, GRID))
+				draw_rect(r, Color("#101216"))
+				draw_rect(r, Color("#2a2d31"), false, 1)
 
 func _draw_dungeon() -> void:
 	_draw_header("THE HOLLOW BELOW", "DUNGEON  •  EXPLORATION LAYER")
