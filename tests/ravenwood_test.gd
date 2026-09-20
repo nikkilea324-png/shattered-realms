@@ -14,9 +14,9 @@ func test_ravenwood_loads_as_hex_territory() -> void:
 	game._handle_click(Vector2(450, 400))
 	assert_that(game.mode).is_equal("territory")
 	assert_that(game.selected_territory).is_equal("Ravenwood")
-	assert_that(game.hero_cell).is_equal(Vector2i(8, 5))
+	assert_that(game.hero_cell).is_equal(Vector2i(11, 7))
 	assert_that(game._raven_terrain_at(Vector2i(1, 5))).is_equal("mountain")
-	assert_that(game._raven_terrain_at(Vector2i(15, 6))).is_equal("marsh")
+	assert_that(game._raven_terrain_at(Vector2i(21, 6))).is_equal("marsh")
 
 func test_ravenwood_movement_costs_terrain() -> void:
 	game._handle_click(Vector2(1000, 200))
