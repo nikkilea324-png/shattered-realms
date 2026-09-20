@@ -13,13 +13,11 @@ func _init(p_commander_id: String = "") -> void:
 
 func assign_to_army(army_id: String) -> void:
 	assigned_army_id = army_id
-	if governed_territory_id == army_id:
-		governed_territory_id = ""
+	governed_territory_id = ""
 
 func govern_territory(territory_id: String) -> void:
 	governed_territory_id = territory_id
-	if assigned_army_id == territory_id:
-		assigned_army_id = ""
+	assigned_army_id = ""
 
 func clear_assignment() -> void:
 	assigned_army_id = ""
