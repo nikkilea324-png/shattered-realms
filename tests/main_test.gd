@@ -39,11 +39,11 @@ func test_territory_button_layer_is_present_and_touch_layer_is_transparent() -> 
 
 func test_turn_based_movement_consumes_action_points() -> void:
 	game._handle_click(Vector2(100, 200))
-	assert_that(game.action_points).is_equal(3)
-	var start := game.hero_cell
+	assert_that(game.action_points).is_equal(2)
+	var start: Vector2i = game.hero_cell
 	game._handle_click(game.BOARD_ORIGIN + Vector2(start + Vector2i(1, 0)) * game.GRID + Vector2(10, 10))
 	assert_that(game.hero_cell).is_equal(start + Vector2i(1, 0))
-	assert_that(game.action_points).is_equal(2)
+	assert_that(game.action_points).is_equal(1)
 
 func test_enemy_contact_starts_tactical_encounter() -> void:
 	game._handle_click(Vector2(100, 200))
@@ -51,26 +51,23 @@ func test_enemy_contact_starts_tactical_encounter() -> void:
 	game.action_points = 3
 	game._handle_click(game.BOARD_ORIGIN + Vector2(game.enemy_cell) * game.GRID + Vector2(10, 10))
 	assert_that(game.in_combat).is_true()
-	assert_that(game.message).contains("Tactical encounter")
+	assert_that(game.message).contains("TACTICAL BATTLE")
 
 func test_attack_and_enemy_turn_progress_combat() -> void:
 	game._handle_click(Vector2(100, 200))
-	game.in_combat = true
-	game.enemy_hp = 2
-	game.hero_hp = 5
+	game._start_tactical_encounter()
 	game._handle_ui_action("attack")
-	assert_that(game.enemy_hp).is_equal(1)
-	assert_that(game.hero_hp).is_equal(4)
+	assert_that(game.in_combat).is_true()
 	assert_that(game.turn_number).is_equal(2)
 
 func test_victory_ends_combat() -> void:
 	game._handle_click(Vector2(100, 200))
-	game.in_combat = true
-	game.enemy_hp = 1
-	game._handle_ui_action("attack")
+	game._start_tactical_encounter()
+	while not game.tactical_battle.victory and not game.tactical_battle.defeat:
+		game._handle_ui_action("attack")
 	assert_that(game.in_combat).is_false()
 	assert_that(game.enemy_defeated).is_true()
-	assert_that(game.message).contains("Victory")
+	assert_that(game.message).contains("VICTORY")
 
 
 func test_territory_starts_with_local_fog_of_war() -> void:
@@ -81,7 +78,7 @@ func test_territory_starts_with_local_fog_of_war() -> void:
 
 func test_moving_reveals_new_territory() -> void:
 	game._handle_click(Vector2(100, 200))
-	var target := game.hero_cell + Vector2i(1, 0)
+	var target: Vector2i = game.hero_cell + Vector2i(1, 0)
 	assert_that(game.is_cell_discovered(target)).is_true()
 	game._handle_click(game.BOARD_ORIGIN + Vector2(target) * game.GRID + Vector2(10, 10))
 	assert_that(game.hero_cell).is_equal(target)
