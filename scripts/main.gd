@@ -132,6 +132,7 @@ func _handle_click(pos: Vector2) -> void:
 			hero_cell = cell
 			action_points -= 1
 			message = "Cave discovered — enter the dark below." if cell == cave_cell else "The party advances across the frontier."
+			queue_redraw()
 	elif mode == "dungeon":
 		if Rect2(1025, 625, 190, 52).has_point(pos):
 			_to_world()
@@ -140,6 +141,7 @@ func _handle_click(pos: Vector2) -> void:
 		if _valid_cell(cell):
 			dungeon_cell = cell
 			message = "RELIC FOUND — the first ancient relic is yours!" if cell == Vector2i(5, 4) else "Torchlight reveals old stone, traps, and tracks."
+			queue_redraw()
 
 func _move_actor(delta: Vector2i) -> void:
 	if mode != "territory" and mode != "dungeon":
@@ -159,9 +161,11 @@ func _move_actor(delta: Vector2i) -> void:
 		hero_cell = target
 		action_points -= 1
 		message = "Cave discovered — enter the dark below." if hero_cell == cave_cell else "The party advances across the frontier."
+		queue_redraw()
 	else:
 		dungeon_cell = _clamp_cell(dungeon_cell + delta)
 		message = "RELIC FOUND — the first ancient relic is yours!" if dungeon_cell == Vector2i(5, 4) else "Torchlight reveals old stone, traps, and tracks."
+		queue_redraw()
 
 
 func _attack_enemy() -> void:
@@ -173,6 +177,7 @@ func _attack_enemy() -> void:
 		enemy_defeated = true
 		in_combat = false
 		message = "Victory! The frontier is yours, and the creature leaves behind a bloodied relic."
+		queue_redraw()
 		return
 	hero_hp -= 1
 	turn_number += 1
@@ -183,6 +188,7 @@ func _attack_enemy() -> void:
 		message = "Defeat. The party retreats from the frontier."
 	else:
 		message = "Strike lands. The creature counters. Your next turn begins."
+	queue_redraw()
 
 func _end_turn() -> void:
 	if mode != "territory":
@@ -198,6 +204,7 @@ func _end_turn() -> void:
 			message = "The enemy strikes as you pass the initiative. Your turn begins."
 	else:
 		message = "Turn %d begins. Action points restored." % turn_number
+	queue_redraw()
 
 func _cell_at(pos: Vector2) -> Vector2i:
 	var local := pos - BOARD_ORIGIN
