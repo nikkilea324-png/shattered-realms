@@ -54,3 +54,20 @@
 - [ ] Device scaling tests
 - [ ] Release build
 - [ ] Play Store package
+
+
+## Phase 2 implementation progress
+- [x] Twelve core unit types with distinct combat roles
+- [x] Twelve-slot army formation limit
+- [x] Army composition presets
+- [x] Commander-to-army assignment state
+- [x] Data-driven tactical battle engine
+- [x] Unit matchup bonuses and terrain modifiers
+- [x] Tactical victory/defeat resolution
+- [ ] Battlefield unit selection UI
+- [ ] Formation positioning and facing
+- [ ] Full commander army bonuses in combat
+- [ ] Morale, retreat, pursuit, and supply effects in tactical battles
+- [ ] Siege battle mode
+- [ ] Army-vs-army campaign encounters
+- [ ] Territory-specific tactical map layouts
