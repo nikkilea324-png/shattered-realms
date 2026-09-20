@@ -6,7 +6,7 @@ var commander_id: String = ""
 const FORMATION_SLOTS := 12
 var morale: int = 6
 var supplies: int = 30
-var units: Dictionary = {"levy": 20, "rangers": 4}
+var units: Dictionary = {"militia": 3, "rangers": 2}
 
 func set_commander(p_commander_id: String) -> void:
 	commander_id = p_commander_id
