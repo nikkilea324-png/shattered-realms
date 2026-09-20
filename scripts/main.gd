@@ -23,6 +23,10 @@ var message := "Choose a realm to begin."
 var turn_number := 1
 var action_points := 3
 const MAX_ACTION_POINTS := 6
+const DEFAULT_TERRITORY_MOVEMENT := 2
+var movement_remaining := DEFAULT_TERRITORY_MOVEMENT
+var active_commander := "Kaela Varyn"
+var commander_movement := {"Ser Kaela Varyn":2,"Kaela Varyn":2,"Edrin Vale":3,"Lord Garrick Thorne":2,"Nyra Vex":3,"Hakon Blood-Eye":2,"Malrec the Ashen":2}
 var hero_hp := 5
 var enemy_cell := Vector2i(8, 4)
 var enemy_hp := 3
@@ -126,6 +130,7 @@ func _handle_click(pos: Vector2) -> void:
 					enemy_cell = Vector2i(15, 11)
 				turn_number = 1
 				action_points = MAX_ACTION_POINTS
+				movement_remaining = _territory_movement_allowance()
 				hero_hp = 5
 				enemy_hp = 3
 				enemy_defeated = false
@@ -155,14 +160,15 @@ func _handle_click(pos: Vector2) -> void:
 				message = "That hex is not adjacent to the army."
 				return
 			var move_cost := _raven_movement_cost(cell) if selected_territory == "Ravenwood" else 1
-			if action_points < move_cost:
-				message = "Not enough movement points for that terrain."
+			if movement_remaining < move_cost:
+				message = "Not enough movement for this terrain. End the turn or use a commander with greater mobility."
 				return
 			if cell == enemy_cell and not enemy_defeated:
 				_start_tactical_encounter()
 				return
 			hero_cell = cell
-			action_points -= move_cost
+			movement_remaining -= move_cost
+			action_points = movement_remaining
 			_reveal_around(hero_cell, 2)
 			message = "Cave discovered — enter the dark below." if cell == cave_cell else "The party advances across the frontier."
 			queue_redraw()
@@ -191,14 +197,15 @@ func _move_actor(delta: Vector2i) -> void:
 			message = "Use the hexes around the army to move."
 			return
 		var move_cost := _raven_movement_cost(target) if selected_territory == "Ravenwood" else 1
-		if action_points < move_cost:
+		if movement_remaining < move_cost:
 			message = "Not enough movement points for that terrain."
 			return
 		if target == enemy_cell and not enemy_defeated:
 			_start_tactical_encounter()
 			return
 		hero_cell = target
-		action_points -= move_cost
+		movement_remaining -= move_cost
+		action_points = movement_remaining
 		_reveal_around(hero_cell, 2)
 		message = "Cave discovered — enter the dark below." if hero_cell == cave_cell else "The party advances across the frontier."
 		queue_redraw()
@@ -250,6 +257,7 @@ func _end_turn() -> void:
 		return
 	turn_number += 1
 	action_points = MAX_ACTION_POINTS
+	movement_remaining = _territory_movement_allowance()
 	if in_combat and not enemy_defeated:
 		hero_hp = maxi(hero_hp - 1, 0)
 		if hero_hp == 0:
@@ -258,7 +266,7 @@ func _end_turn() -> void:
 		else:
 			message = "The enemy strikes as you pass the initiative. Your turn begins."
 	else:
-		message = "Turn %d begins. Action points restored." % turn_number
+		message = "Turn %d begins. Movement restored: %d hexes." % [turn_number, movement_remaining]
 	queue_redraw()
 
 func _cell_at(pos: Vector2) -> Vector2i:
@@ -396,7 +404,7 @@ func _draw_ravenwood() -> void:
 	for army in ravenwood_armies:
 		if is_cell_discovered(army.cell):
 			_draw_commander_piece(army)
-	_draw_panel(Vector2(995,105), Vector2(250,250), "RAVENWOOD", ["Capital: Oakenheart","Forest: +1 defense / ambush","Plains: 1 movement","Mountain: 3 movement / +2 defense","Marsh: 3 movement","Turn: %d" % turn_number,"AP: %d / %d" % [action_points, MAX_ACTION_POINTS],"Commanders: 4","Hidden dungeon: %s" % ("revealed" if is_cell_discovered(Vector2i(7,12)) else "unknown")])
+	_draw_panel(Vector2(995,105), Vector2(250,250), "RAVENWOOD", ["Capital: Oakenheart","Forest: +1 defense / ambush","Plains: 1 movement","Mountain: 3 movement / +2 defense","Marsh: 3 movement","Turn: %d" % turn_number,"Movement: %d / %d" % [movement_remaining, _territory_movement_allowance()],"Commanders: 4","Hidden dungeon: %s" % ("revealed" if is_cell_discovered(Vector2i(7,12)) else "unknown")])
 
 func _draw_hex(center: Vector2, fill: Color, selected: bool = false) -> void:
 	var pts := PackedVector2Array()
@@ -540,3 +548,6 @@ func _draw_monster(p: Vector2) -> void:
 	draw_circle(p+Vector2(-13,-4),6,Color("#b28b56"))
 	draw_circle(p+Vector2(13,-4),6,Color("#b28b56"))
 	draw_string(ThemeDB.fallback_font,p+Vector2(-7,37),"?",HORIZONTAL_ALIGNMENT_LEFT,-1,20,Color("#b28b56"))
+
+func _territory_movement_allowance() -> int:
+	return int(commander_movement.get(active_commander, DEFAULT_TERRITORY_MOVEMENT))
