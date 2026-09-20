@@ -120,7 +120,10 @@ func _handle_click(pos: Vector2) -> void:
 			if t.rect.has_point(pos):
 				selected_territory = t.name
 				mode = "territory"
-				hero_cell = Vector2i(2, 6)
+				hero_cell = Vector2i(8, 5) if t.name == "Ravenwood" else Vector2i(2, 6)
+				if t.name == "Ravenwood":
+					cave_cell = Vector2i(5, 7)
+					enemy_cell = Vector2i(9, 8)
 				turn_number = 1
 				action_points = MAX_ACTION_POINTS
 				hero_hp = 5
@@ -148,11 +151,18 @@ func _handle_click(pos: Vector2) -> void:
 			if action_points <= 0:
 				message = "No action points remain. End the turn."
 				return
+			if selected_territory == "Ravenwood" and not _raven_neighbors(hero_cell).has(cell):
+				message = "That hex is not adjacent to the army."
+				return
+			var move_cost := _raven_movement_cost(cell) if selected_territory == "Ravenwood" else 1
+			if action_points < move_cost:
+				message = "Not enough movement points for that terrain."
+				return
 			if cell == enemy_cell and not enemy_defeated:
 				_start_tactical_encounter()
 				return
 			hero_cell = cell
-			action_points -= 1
+			action_points -= move_cost
 			_reveal_around(hero_cell, 2)
 			message = "Cave discovered — enter the dark below." if cell == cave_cell else "The party advances across the frontier."
 			queue_redraw()
@@ -177,11 +187,18 @@ func _move_actor(delta: Vector2i) -> void:
 			message = "No action points remain. End the turn."
 			return
 		var target := _clamp_cell(hero_cell + delta)
+		if selected_territory == "Ravenwood" and not _raven_neighbors(hero_cell).has(target):
+			message = "Use the hexes around the army to move."
+			return
+		var move_cost := _raven_movement_cost(target) if selected_territory == "Ravenwood" else 1
+		if action_points < move_cost:
+			message = "Not enough movement points for that terrain."
+			return
 		if target == enemy_cell and not enemy_defeated:
 			_start_tactical_encounter()
 			return
 		hero_cell = target
-		action_points -= 1
+		action_points -= move_cost
 		_reveal_around(hero_cell, 2)
 		message = "Cave discovered — enter the dark below." if hero_cell == cave_cell else "The party advances across the frontier."
 		queue_redraw()
@@ -362,15 +379,17 @@ func _draw_ravenwood() -> void:
 	draw_polyline(road, Color("#8b7658"), 7)
 	var river := PackedVector2Array([_raven_hex_center(Vector2i(13,2)),_raven_hex_center(Vector2i(14,4)),_raven_hex_center(Vector2i(13,6)),_raven_hex_center(Vector2i(14,8)),_raven_hex_center(Vector2i(13,9))])
 	draw_polyline(river, Color("#375f69"), 11)
+	_draw_raven_fog()
 	for id in ravenwood_locations:
 		var loc: Dictionary = ravenwood_locations[id]
 		var cell := Vector2i(int(loc.cell[0]), int(loc.cell[1]))
 		if id == "hidden_dungeon" and not is_cell_discovered(cell):
 			continue
-		_draw_raven_location(cell, str(loc.type), str(loc.name))
+		if is_cell_discovered(cell):
+			_draw_raven_location(cell, str(loc.type), str(loc.name))
 	for army in ravenwood_armies:
-		_draw_commander_piece(army)
-	_draw_raven_fog()
+		if is_cell_discovered(army.cell):
+			_draw_commander_piece(army)
 	_draw_panel(Vector2(995,105), Vector2(250,250), "RAVENWOOD", ["Capital: Oakenheart","Forest: +1 defense / ambush","Plains: 1 movement","Mountain: 3 movement / +2 defense","Marsh: 3 movement","Turn: %d" % turn_number,"AP: %d / %d" % [action_points, MAX_ACTION_POINTS],"Commanders: 4","Hidden dungeon: %s" % ("revealed" if is_cell_discovered(Vector2i(5,7)) else "unknown")])
 
 func _draw_hex(center: Vector2, fill: Color, selected: bool = false) -> void:
