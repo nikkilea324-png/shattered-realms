@@ -328,7 +328,14 @@ func _reveal_around(center: Vector2i, radius: int) -> void:
 	for y in range(center.y - radius, center.y + radius + 1):
 		for x in range(center.x - radius, center.x + radius + 1):
 			var cell := Vector2i(x, y)
-			if _valid_cell(cell) and (abs(x - center.x) + abs(y - center.y) <= radius if not (mode == "territory" and selected_territory == "Ravenwood") else _raven_hex_center(center).distance_to(_raven_hex_center(cell)) <= HEX_SIZE * 2.8):
+			if not _valid_cell(cell):
+				continue
+			var visible := false
+			if mode == "territory" and selected_territory == "Ravenwood":
+				visible = _raven_hex_center(center).distance_to(_raven_hex_center(cell)) <= HEX_SIZE * 2.8
+			else:
+				visible = abs(x - center.x) + abs(y - center.y) <= radius
+			if visible:
 				discovered_cells[cell] = true
 
 func _clamp_cell(cell: Vector2i) -> Vector2i:
@@ -396,7 +403,8 @@ func _draw_ravenwood() -> void:
 	_draw_raven_fog()
 	for id in ravenwood_locations:
 		var loc: Dictionary = ravenwood_locations[id]
-		var cell := Vector2i(int(loc.cell[0]), int(loc.cell[1]))
+		var loc_cell: Array = loc.get("cell", [0, 0])
+		var cell := Vector2i(int(loc_cell[0]), int(loc_cell[1]))
 		if id == "hidden_dungeon" and not is_cell_discovered(cell):
 			continue
 		if is_cell_discovered(cell):
@@ -425,11 +433,12 @@ func _draw_raven_location(cell: Vector2i, kind: String, label: String) -> void:
 	draw_string(ThemeDB.fallback_font, c + Vector2(-45,31), label, HORIZONTAL_ALIGNMENT_LEFT, 105, 9, Color("#e5dcc7"))
 
 func _draw_commander_piece(army: Dictionary) -> void:
-	var c := _raven_hex_center(army.cell)
+	var army_cell: Vector2i = army.get("cell", Vector2i.ZERO)
+	var c := _raven_hex_center(army_cell)
 	draw_circle(c + Vector2(0,-9), 15, Color("#101114"))
 	draw_circle(c + Vector2(0,-9), 11, Color("#b59b63"))
-	draw_string(ThemeDB.fallback_font, c + Vector2(-5,-4), str(army.icon), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#171719"))
-	draw_string(ThemeDB.fallback_font, c + Vector2(-42,25), str(army.name), HORIZONTAL_ALIGNMENT_LEFT, 100, 9, Color("#ddd3bd"))
+	draw_string(ThemeDB.fallback_font, c + Vector2(-5,-4), str(army.get("icon", "?")), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#171719"))
+	draw_string(ThemeDB.fallback_font, c + Vector2(-42,25), str(army.get("name", "Army")), HORIZONTAL_ALIGNMENT_LEFT, 100, 9, Color("#ddd3bd"))
 
 func _draw_raven_fog() -> void:
 	for y in range(RAVEN_ROWS):
