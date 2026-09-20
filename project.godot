@@ -19,3 +19,6 @@ renderer/rendering_method.mobile="gl_compatibility"
 [input]
 select="MouseButton(1)"
 back="Key(Escape)"
+
+[input_devices]
+pointing/emulate_mouse_from_touch=true
