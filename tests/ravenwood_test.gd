@@ -19,7 +19,7 @@ func test_ravenwood_loads_as_hex_territory() -> void:
 	assert_that(game._raven_terrain_at(Vector2i(21, 6))).is_equal("marsh")
 
 func test_ravenwood_movement_costs_terrain() -> void:
-	game._handle_click(Vector2(1000, 200))
+	game._handle_click(Vector2(450, 400))
 	assert_that(game._raven_movement_cost(Vector2i(10, 6))).is_equal(2)
 	assert_that(game._raven_movement_cost(Vector2i(11, 6))).is_equal(1)
 
@@ -27,5 +27,5 @@ func test_ravenwood_has_four_commander_pieces() -> void:
 	assert_that(game.ravenwood_armies.size()).is_equal(4)
 
 func test_ravenwood_hidden_dungeon_starts_hidden() -> void:
-	game._handle_click(Vector2(1000, 200))
-	assert_that(game.is_cell_discovered(Vector2i(5, 7))).is_false()
+	game._handle_click(Vector2(450, 400))
+	assert_that(game.is_cell_discovered(Vector2i(7, 12))).is_false()
