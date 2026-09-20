@@ -316,7 +316,7 @@ func _reveal_around(center: Vector2i, radius: int) -> void:
 	for y in range(center.y - radius, center.y + radius + 1):
 		for x in range(center.x - radius, center.x + radius + 1):
 			var cell := Vector2i(x, y)
-			if _valid_cell(cell) and abs(x - center.x) + abs(y - center.y) <= radius:
+			if _valid_cell(cell) and (abs(x - center.x) + abs(y - center.y) <= radius if not (mode == "territory" and selected_territory == "Ravenwood") else _raven_hex_center(center).distance_to(_raven_hex_center(cell)) <= HEX_SIZE * 2.8):
 				discovered_cells[cell] = true
 
 func _clamp_cell(cell: Vector2i) -> Vector2i:
